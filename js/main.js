@@ -117,12 +117,15 @@
   })();
 
   /* ===== Заявка: форма в окне и форма внизу страницы =====
-     Одно поле — Telegram. Заявки уходят через FormSubmit (formsubmit.co), как на прежнем сайте:
-     без своего сервера. Проверка и тексты ошибок тоже взяты оттуда.
+     Одно поле — Telegram. Заявки уходят через Web3Forms (web3forms.com) письмом на почту Евгения,
+     без своего сервера. До 19.11.2026 стоял FormSubmit: он перестал отвечать.
+     ACCESS_KEY — ключ доступа Web3Forms. Он не секретный: привязан к почте получателя и по задумке
+     сервиса лежит в коде сайта. Пока ключа нет, форма честно показывает ошибку и ничего не шлёт.
      Форм две, логика одна: каждая лежит в своей карточке .fcard. Когда заявка ушла из любой,
      «Готово» показывают обе — чтобы человек не отправил её второй раз. */
   (function () {
-    var ENDPOINT = "https://formsubmit.co/ajax/effjkeee@gmail.com";
+    var ENDPOINT = "https://api.web3forms.com/submit";
+    var ACCESS_KEY = "304399d8-0fd8-4c78-8c69-a9cc0f7f875f"; // ключ из письма Web3Forms, получен Евгением 19.11.2026
     var cards = $$(".fcard").filter(function (c) { return $("form", c); });
 
     function isValidTelegram(value) {
@@ -168,6 +171,7 @@
         var value = input.value.trim();
         if (!isValidTelegram(value)) { fail("Укажите ник в Telegram или номер"); input.focus(); return; }
         if (honey.value) { allDone(card); return; } // бот заполнил скрытое поле — делаем вид, что всё ок
+        if (!ACCESS_KEY) { fail("Не получилось отправить. Попробуйте ещё раз через минуту."); return; }
 
         busy(true);
         // сервис может не ответить вовсе: через 20 секунд обрываем запрос и показываем ошибку, а не держим кнопку
@@ -178,10 +182,10 @@
           method: "POST",
           headers: { "Content-Type": "application/json", "Accept": "application/json" },
           body: JSON.stringify({
-            "Telegram": value,
-            "_subject": "Новая заявка с сайта ivanoff.pro",
-            "_template": "table",
-            "_captcha": "false"
+            "access_key": ACCESS_KEY,
+            "subject": "Новая заявка с сайта ivanoff.pro",
+            "from_name": "ivanoff.pro",
+            "Telegram": value
           })
         })
           .then(function (res) { return res.json(); })
