@@ -1,1266 +1,503 @@
 <!doctype html>
 <html lang="ru">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>ivanoff.pro — автоматизация для бизнеса</title>
-  <meta name="description" content="Разберу ваш процесс и пришлю письменно, что можно автоматизировать, как и за какой срок. Бесплатно.">
-  <meta name="theme-color" content="#08090b">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Unbounded:wght@500;700&display=swap" rel="stylesheet">
-  <script>document.documentElement.classList.add("js");</script>
-  <style>
-    @property --angle {
-      syntax: "<angle>";
-      inherits: false;
-      initial-value: 0deg;
-    }
-
-    :root {
-      --bg: #08090b;
-      --panel: rgba(21, 22, 27, .68);
-      --panel-solid: #14151a;
-      --line: rgba(255, 255, 255, .09);
-      --text: #f4f5f2;
-      --muted: #a3a7b0;
-      --lime: #c8ff3e;
-      --lime-soft: rgba(200, 255, 62, .14);
-      --violet: #7c5cff;
-      --error: #ff7a7a;
-      --display: "Unbounded", "Manrope", -apple-system, "Segoe UI", sans-serif;
-      --body: "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-    }
-
-    * { box-sizing: border-box; }
-
-    html { scroll-behavior: smooth; overflow-x: hidden; }
-
-    /* Свечение и бегущая строка не должны расширять страницу на телефоне */
-    main { overflow-x: hidden; overflow-x: clip; }
-
-    body {
-      margin: 0;
-      background: var(--bg);
-      color: var(--text);
-      font-family: var(--body);
-      font-size: 17px;
-      line-height: 1.55;
-      -webkit-font-smoothing: antialiased;
-      overflow-x: hidden;
-    }
-
-    ::selection { background: var(--lime); color: #0a0a0a; }
-
-    /* ---------- Фон: сеть узлов и свечение ---------- */
-
-    #net {
-      position: fixed;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 0;
-      pointer-events: none;
-    }
-
-    .glow {
-      position: absolute;
-      border-radius: 50%;
-      filter: blur(90px);
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    .glow-a {
-      width: 520px; height: 520px;
-      top: -180px; right: -120px;
-      background: radial-gradient(circle, rgba(124, 92, 255, .55), transparent 65%);
-      animation: drift 16s ease-in-out infinite alternate;
-    }
-
-    .glow-b {
-      width: 460px; height: 460px;
-      top: 240px; left: -200px;
-      background: radial-gradient(circle, rgba(200, 255, 62, .22), transparent 65%);
-      animation: drift 20s ease-in-out infinite alternate-reverse;
-    }
-
-    @keyframes drift {
-      from { transform: translate3d(0, 0, 0) scale(1); }
-      to   { transform: translate3d(-60px, 50px, 0) scale(1.15); }
-    }
-
-    .container {
-      position: relative;
-      z-index: 1;
-      width: 100%;
-      max-width: 1160px;
-      margin: 0 auto;
-      padding: 0 20px;
-    }
-
-    /* ---------- Шапка ---------- */
-
-    .top {
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      z-index: 2;
-      padding: 22px 0;
-    }
-
-    .top .container {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-    }
-
-    .logo {
-      font-family: var(--display);
-      font-weight: 700;
-      font-size: 15px;
-      letter-spacing: -0.01em;
-      color: var(--text);
-      text-decoration: none;
-    }
-
-    .logo span { color: var(--lime); }
-
-    .top-note {
-      color: var(--muted);
-      font-size: 14px;
-    }
-
-    /* ---------- Первый экран ---------- */
-
-    .hero {
-      position: relative;
-      min-height: 100vh;
-      min-height: 100svh;
-      display: flex;
-      align-items: center;
-      padding: 120px 0 72px;
-    }
-
-    .hero-grid {
-      display: grid;
-      grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr);
-      gap: 56px;
-      align-items: center;
-    }
-
-    .pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      padding: 7px 14px 7px 12px;
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      background: rgba(255, 255, 255, .04);
-      font-size: 14px;
-      font-weight: 600;
-      margin-bottom: 24px;
-    }
-
-    .pill i {
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      background: var(--lime);
-      box-shadow: 0 0 0 0 rgba(200, 255, 62, .6);
-      animation: ping 2s ease-out infinite;
-    }
-
-    @keyframes ping {
-      to { box-shadow: 0 0 0 10px rgba(200, 255, 62, 0); }
-    }
-
-    h1 {
-      margin: 0 0 22px;
-      font-family: var(--display);
-      font-weight: 700;
-      font-size: clamp(28px, 4.3vw, 54px);
-      line-height: 1.1;
-      letter-spacing: -0.025em;
-    }
-
-    .hl {
-      background: linear-gradient(100deg, var(--lime) 0%, #7dffb2 35%, var(--lime) 70%);
-      background-size: 220% 100%;
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-      animation: shimmer 5s linear infinite;
-    }
-
-    @keyframes shimmer {
-      to { background-position: -220% 0; }
-    }
-
-    .lead {
-      margin: 0;
-      max-width: 520px;
-      color: var(--muted);
-      font-size: clamp(17px, 1.7vw, 20px);
-    }
-
-    .lead b { color: var(--text); font-weight: 600; }
-
-    /* Появление первого экрана */
-    .js .rise {
-      opacity: 0;
-      transform: translateY(22px);
-      filter: blur(10px);
-      animation: rise .9s cubic-bezier(.2, .7, .2, 1) forwards;
-    }
-    .js .rise.d1 { animation-delay: .08s; }
-    .js .rise.d2 { animation-delay: .2s; }
-    .js .rise.d3 { animation-delay: .32s; }
-
-    @keyframes rise {
-      to { opacity: 1; transform: none; filter: none; }
-    }
-
-    /* ---------- Форма ---------- */
-
-    .card {
-      position: relative;
-      background: var(--panel);
-      -webkit-backdrop-filter: blur(18px);
-      backdrop-filter: blur(18px);
-      border: 1px solid var(--line);
-      border-radius: 24px;
-      padding: 28px;
-      box-shadow: 0 30px 80px -30px rgba(0, 0, 0, .8);
-      scroll-margin-top: 24px;
-    }
-
-    /* Бегущая подсветка по рамке */
-    .card::before {
-      content: "";
-      position: absolute;
-      inset: -1px;
-      padding: 1px;
-      border-radius: inherit;
-      background: conic-gradient(from var(--angle), transparent 0 62%, var(--lime) 78%, var(--violet) 90%, transparent 100%);
-      -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-      -webkit-mask-composite: xor;
-      mask-composite: exclude;
-      animation: spin 7s linear infinite;
-      pointer-events: none;
-    }
-
-    @keyframes spin {
-      to { --angle: 360deg; }
-    }
-
-    .card-title {
-      margin: 0 0 4px;
-      font-family: var(--display);
-      font-weight: 500;
-      font-size: 18px;
-      letter-spacing: -0.01em;
-    }
-
-    .card-sub {
-      margin: 0 0 22px;
-      color: var(--muted);
-      font-size: 14px;
-    }
-
-    .field { margin-bottom: 16px; }
-
-    label {
-      display: block;
-      margin-bottom: 6px;
-      font-size: 14px;
-      font-weight: 600;
-    }
-
-    .optional { color: var(--muted); font-weight: 400; }
-
-    input, textarea {
-      width: 100%;
-      padding: 14px 15px;
-      background: rgba(8, 9, 11, .7);
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      color: var(--text);
-      font: inherit;
-      font-size: 16px; /* 16px, чтобы iOS не зумил поле при фокусе */
-      transition: border-color .2s, box-shadow .2s;
-    }
-
-    textarea { min-height: 116px; resize: vertical; }
-
-    input::placeholder, textarea::placeholder { color: #666b75; }
-
-    input:focus, textarea:focus {
-      outline: none;
-      border-color: var(--lime);
-      box-shadow: 0 0 0 4px var(--lime-soft);
-    }
-
-    input.invalid { border-color: var(--error); box-shadow: none; }
-
-    .error-text {
-      display: none;
-      margin-top: 6px;
-      color: var(--error);
-      font-size: 13px;
-    }
-
-    .field.has-error .error-text { display: block; }
-
-    .honeypot {
-      position: absolute;
-      left: -9999px;
-      width: 1px; height: 1px;
-      overflow: hidden;
-    }
-
-    .btn {
-      position: relative;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 100%;
-      padding: 17px 22px;
-      background: var(--lime);
-      color: #0b0c08;
-      border: 0;
-      border-radius: 14px;
-      font: inherit;
-      font-size: 16px;
-      font-weight: 700;
-      line-height: 1.3;
-      text-align: center;
-      text-decoration: none;
-      cursor: pointer;
-      overflow: hidden;
-      transition: transform .2s, box-shadow .2s;
-      box-shadow: 0 10px 34px -10px rgba(200, 255, 62, .55);
-    }
-
-    /* Блик на кнопке */
-    .btn::after {
-      content: "";
-      position: absolute;
-      top: 0; bottom: 0;
-      left: -60%;
-      width: 40%;
-      background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .65), transparent);
-      transform: skewX(-20deg);
-      animation: shine 4.5s ease-in-out infinite;
-    }
-
-    @keyframes shine {
-      0%, 60% { left: -60%; }
-      100%    { left: 130%; }
-    }
-
-    .btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 16px 44px -10px rgba(200, 255, 62, .75);
-    }
-
-    .btn:active { transform: translateY(0); }
-    .btn:disabled { opacity: .65; cursor: default; transform: none; }
-    .btn:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
-
-    .status {
-      margin: 14px 0 0;
-      font-size: 14px;
-      text-align: center;
-      color: var(--error);
-    }
-
-    .status:empty { display: none; }
-
-    .form-note {
-      margin: 14px 0 0;
-      color: var(--muted);
-      font-size: 13px;
-      text-align: center;
-    }
-
-    /* Экран «отправлено» */
-    .done {
-      display: none;
-      text-align: center;
-      padding: 36px 0 28px;
-    }
-
-    .card.sent form, .card.sent .card-title, .card.sent .card-sub { display: none; }
-    .card.sent .done { display: block; }
-
-    .check { width: 84px; height: 84px; margin-bottom: 18px; }
-
-    .check circle {
-      fill: none;
-      stroke: var(--lime);
-      stroke-width: 3;
-      stroke-dasharray: 240;
-      stroke-dashoffset: 240;
-    }
-
-    .check path {
-      fill: none;
-      stroke: var(--lime);
-      stroke-width: 4;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-      stroke-dasharray: 60;
-      stroke-dashoffset: 60;
-    }
-
-    .card.sent .check circle { animation: draw .7s ease-out forwards; }
-    .card.sent .check path { animation: draw .45s .55s ease-out forwards; }
-
-    @keyframes draw {
-      to { stroke-dashoffset: 0; }
-    }
-
-    .done-title {
-      margin: 0 0 8px;
-      font-family: var(--display);
-      font-weight: 700;
-      font-size: 22px;
-    }
-
-    .done p { margin: 0; color: var(--muted); }
-
-    /* ---------- Бегущая строка ---------- */
-
-    .ticker {
-      position: relative;
-      z-index: 1;
-      overflow: hidden;
-      padding: 26px 0;
-      border-top: 1px solid var(--line);
-      border-bottom: 1px solid var(--line);
-      background: rgba(8, 9, 11, .6);
-    }
-
-    .ticker-track {
-      display: flex;
-      width: max-content;
-      animation: marquee 38s linear infinite;
-    }
-
-    .ticker-track span {
-      font-family: var(--display);
-      font-weight: 700;
-      font-size: clamp(24px, 4.4vw, 52px);
-      line-height: 1;
-      white-space: nowrap;
-      color: transparent;
-      -webkit-text-stroke: 1px rgba(255, 255, 255, .32);
-      padding-right: .5em;
-    }
-
-    .ticker-track span::after {
-      content: "✦";
-      color: var(--lime);
-      -webkit-text-stroke: 0;
-      margin-left: .5em;
-      font-size: .6em;
-      vertical-align: middle;
-    }
-
-    @keyframes marquee {
-      to { transform: translateX(-50%); }
-    }
-
-    /* ---------- Секции ---------- */
-
-    section { position: relative; z-index: 1; padding: 96px 0; }
-
-    .eyebrow {
-      display: block;
-      margin-bottom: 14px;
-      color: var(--lime);
-      font-size: 13px;
-      font-weight: 700;
-      letter-spacing: .14em;
-      text-transform: uppercase;
-    }
-
-    h2 {
-      margin: 0 0 40px;
-      max-width: 820px;
-      font-family: var(--display);
-      font-weight: 700;
-      font-size: clamp(23px, 3.2vw, 40px);
-      line-height: 1.15;
-      letter-spacing: -0.02em;
-    }
-
-    /* Появление при прокрутке */
-    .js .reveal {
-      opacity: 0;
-      transform: translateY(28px);
-      transition: opacity .8s cubic-bezier(.2, .7, .2, 1), transform .8s cubic-bezier(.2, .7, .2, 1);
-      transition-delay: var(--d, 0s);
-    }
-
-    .js .reveal.in { opacity: 1; transform: none; }
-
-    /* Карточки с подсветкой под курсором */
-    .tile {
-      position: relative;
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 20px;
-      padding: 26px;
-      overflow: hidden;
-      transition: border-color .3s, transform .3s;
-    }
-
-    .tile::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(380px circle at var(--mx, 50%) var(--my, 50%), rgba(200, 255, 62, .13), transparent 60%);
-      opacity: 0;
-      transition: opacity .3s;
-      pointer-events: none;
-    }
-
-    .tile:hover { border-color: rgba(200, 255, 62, .35); transform: translateY(-3px); }
-    .tile:hover::after { opacity: 1; }
-
-    /* Боли */
-    .pains {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 16px;
-    }
-
-    .pain {
-      display: flex;
-      gap: 18px;
-      align-items: flex-start;
-      font-size: 19px;
-      font-weight: 500;
-      line-height: 1.4;
-    }
-
-    .nowrap { white-space: nowrap; }
-
-    .pain-num {
-      flex: none;
-      min-width: 28px;
-      font-family: var(--display);
-      font-weight: 700;
-      font-size: 14px;
-      color: var(--lime);
-      padding-top: 5px;
-    }
-
-    .pain p { margin: 0; }
-
-    /* Кейс */
-    .case-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 16px;
-      margin-bottom: 16px;
-    }
-
-    .tile h3 {
-      margin: 0 0 16px;
-      font-family: var(--display);
-      font-weight: 500;
-      font-size: 17px;
-    }
-
-    .tag {
-      display: inline-block;
-      margin-bottom: 14px;
-      padding: 4px 11px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      background: rgba(255, 255, 255, .07);
-      color: var(--muted);
-    }
-
-    .tag.now { background: var(--lime-soft); color: var(--lime); }
-
-    .list { margin: 0; padding: 0; list-style: none; }
-
-    .list li {
-      position: relative;
-      padding-left: 28px;
-      margin-bottom: 12px;
-      color: #d5d8dd;
-    }
-
-    .list li:last-child { margin-bottom: 0; }
-
-    .list li::before {
-      content: "";
-      position: absolute;
-      left: 4px; top: .62em;
-      width: 10px; height: 2px;
-      background: #5d626c;
-    }
-
-    .list.ok li::before {
-      width: 11px; height: 6px;
-      top: .42em;
-      background: none;
-      border-left: 2px solid var(--lime);
-      border-bottom: 2px solid var(--lime);
-      transform: rotate(-45deg);
-    }
-
-    /* Схема: учитель → руководитель → сайт */
-    .pipe {
-      display: flex;
-      align-items: center;
-      gap: 0;
-      padding: 30px 26px;
-    }
-
-    .pipe-node {
-      flex: 1 1 0;
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      padding: 16px 18px;
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      background: rgba(8, 9, 11, .6);
-      animation: lit 6s ease-in-out infinite;
-    }
-
-    .pipe-node:nth-of-type(1) { animation-name: lit1; }
-    .pipe-node:nth-of-type(3) { animation-name: lit2; }
-    .pipe-node:nth-of-type(5) { animation-name: lit3; }
-
-    .pipe-icon {
-      flex: none;
-      width: 42px; height: 42px;
-      display: grid;
-      place-items: center;
-      border-radius: 12px;
-      background: var(--lime-soft);
-      color: var(--lime);
-    }
-
-    .pipe-icon svg { width: 22px; height: 22px; }
-
-    .pipe-node b { display: block; font-size: 15px; font-weight: 700; line-height: 1.25; }
-    .pipe-node small { display: block; margin-top: 2px; color: var(--muted); font-size: 13px; line-height: 1.3; }
-
-    .pipe-line {
-      position: relative;
-      flex: 0 0 56px;
-      height: 2px;
-      background: rgba(255, 255, 255, .14);
-    }
-
-    .pipe-line::after {
-      content: "";
-      position: absolute;
-      top: -4px; left: 0;
-      width: 10px; height: 10px;
-      margin-left: -5px;
-      border-radius: 50%;
-      background: var(--lime);
-      box-shadow: 0 0 14px 3px rgba(200, 255, 62, .7);
-      opacity: 0;
-      animation: go1 6s linear infinite;
-    }
-
-    .pipe-line.second::after { animation-name: go2; }
-
-    @keyframes go1 {
-      0%, 12%   { left: 0; opacity: 0; }
-      14%       { opacity: 1; }
-      34%       { left: 100%; opacity: 1; }
-      36%, 100% { left: 100%; opacity: 0; }
-    }
-
-    @keyframes go2 {
-      0%, 48%   { left: 0; opacity: 0; }
-      50%       { opacity: 1; }
-      70%       { left: 100%; opacity: 1; }
-      72%, 100% { left: 100%; opacity: 0; }
-    }
-
-    @keyframes lit1 {
-      0%, 14%   { border-color: var(--lime); box-shadow: 0 0 30px -8px rgba(200, 255, 62, .6); }
-      22%, 100% { border-color: var(--line); box-shadow: none; }
-    }
-
-    @keyframes lit2 {
-      0%, 32%   { border-color: var(--line); box-shadow: none; }
-      36%, 50%  { border-color: var(--lime); box-shadow: 0 0 30px -8px rgba(200, 255, 62, .6); }
-      58%, 100% { border-color: var(--line); box-shadow: none; }
-    }
-
-    @keyframes lit3 {
-      0%, 68%   { border-color: var(--line); box-shadow: none; }
-      72%, 92%  { border-color: var(--lime); box-shadow: 0 0 30px -8px rgba(200, 255, 62, .6); }
-      100%      { border-color: var(--line); box-shadow: none; }
-    }
-
-    .facts {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px 40px;
-      margin-top: 32px;
-    }
-
-    .fact { display: flex; align-items: baseline; gap: 12px; }
-
-    .fact strong {
-      font-family: var(--display);
-      font-weight: 700;
-      font-size: clamp(26px, 3.4vw, 40px);
-      color: var(--lime);
-      letter-spacing: -0.02em;
-      white-space: nowrap;
-    }
-
-    .fact span { color: var(--muted); font-size: 15px; }
-
-    /* Шаги */
-    .steps {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 16px;
-      counter-reset: step;
-    }
-
-    .step { counter-increment: step; }
-
-    .step::before {
-      content: "0" counter(step);
-      display: block;
-      margin-bottom: 26px;
-      font-family: var(--display);
-      font-weight: 700;
-      font-size: 44px;
-      line-height: 1;
-      color: transparent;
-      -webkit-text-stroke: 1px var(--lime);
-    }
-
-    .step p { margin: 0; color: var(--muted); font-size: 16px; }
-
-    /* Финальный блок */
-    .final { padding: 40px 0 110px; }
-
-    .final-box {
-      position: relative;
-      overflow: hidden;
-      text-align: center;
-      padding: 72px 28px;
-      border: 1px solid var(--line);
-      border-radius: 28px;
-      background:
-        radial-gradient(600px circle at 50% 120%, rgba(200, 255, 62, .2), transparent 60%),
-        radial-gradient(500px circle at 10% -20%, rgba(124, 92, 255, .28), transparent 60%),
-        var(--panel-solid);
-    }
-
-    .final-box h2 { margin: 0 auto 14px; }
-    .final-box p { margin: 0 auto 32px; max-width: 520px; color: var(--muted); }
-    .final-box .btn { width: auto; max-width: 100%; padding: 19px 30px; font-size: 17px; }
-
-    /* ---------- Адаптив ---------- */
-
-    @media (max-width: 960px) {
-      .hero { min-height: 0; padding: 104px 0 56px; }
-      .hero-grid { grid-template-columns: minmax(0, 1fr); gap: 36px; }
-      .lead { max-width: none; }
-      .steps { grid-template-columns: minmax(0, 1fr); }
-      .step::before { margin-bottom: 16px; font-size: 36px; }
-
-      /* Схема становится вертикальной */
-      .pipe { flex-direction: column; align-items: stretch; padding: 22px; }
-      .pipe-line { flex: 0 0 36px; width: 2px; height: 36px; margin-left: 38px; }
-      .pipe-line::after { top: 0; left: -4px; margin: -5px 0 0 0; animation-name: go1v; }
-      .pipe-line.second::after { animation-name: go2v; }
-    }
-
-    @keyframes go1v {
-      0%, 12%   { top: 0; opacity: 0; }
-      14%       { opacity: 1; }
-      34%       { top: 100%; opacity: 1; }
-      36%, 100% { top: 100%; opacity: 0; }
-    }
-
-    @keyframes go2v {
-      0%, 48%   { top: 0; opacity: 0; }
-      50%       { opacity: 1; }
-      70%       { top: 100%; opacity: 1; }
-      72%, 100% { top: 100%; opacity: 0; }
-    }
-
-    @media (max-width: 680px) {
-      body { font-size: 16px; }
-      section { padding: 64px 0; }
-      h2 { margin-bottom: 28px; }
-      .top-note { display: none; }
-      .hero { padding: 88px 0 48px; }
-      .card { padding: 22px 18px; border-radius: 20px; }
-      .pains, .case-grid { grid-template-columns: minmax(0, 1fr); }
-      .tile { padding: 22px 20px; }
-      .pain { font-size: 17px; }
-      .fact { flex-direction: column; gap: 2px; }
-      .final { padding: 16px 0 72px; }
-      .final-box { padding: 48px 20px; border-radius: 22px; }
-      .final-box .btn { width: 100%; padding: 17px 20px; font-size: 16px; }
-      .glow-a { width: 340px; height: 340px; right: -160px; }
-      .glow-b { width: 300px; height: 300px; top: 420px; }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      html { scroll-behavior: auto; }
-      *, *::before, *::after {
-        animation: none !important;
-        transition: none !important;
-      }
-      .js .rise, .js .reveal { opacity: 1; transform: none; filter: none; }
-      .check circle, .check path { stroke-dashoffset: 0; }
-    }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ivanoff.pro — AI и автоматизация для малого бизнеса</title>
+<meta name="description" content="Делаю AI-агентов и ботов — программы, которые сами переносят заявки, отвечают клиентам и собирают отчёты по деньгам.">
+<meta name="theme-color" content="#ffffff">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- шрифт логотипа Gugi: грузятся только буквы надписи IVANOFF.PRO -->
+<link href="https://fonts.googleapis.com/css2?family=Gugi&text=IVANOFF.PRO&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/main.css">
 </head>
 <body>
-  <canvas id="net" aria-hidden="true"></canvas>
 
-  <header class="top">
-    <div class="container">
-      <a class="logo" href="#">ivanoff<span>.pro</span></a>
-      <span class="top-note">Боты и AI-автоматизации для бизнеса</span>
-    </div>
-  </header>
+<!-- Стрелка для кнопок: одна на страницу, в кнопках — ссылкой -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+<!-- логотипы соцсетей: одна копия на страницу, в ссылках — через use -->
+<symbol id="i-ig" viewBox="0 0 24 24"><rect x="2.6" y="2.6" width="18.8" height="18.8" rx="5.6" fill="none" stroke="currentColor" stroke-width="1.9"/><circle cx="12" cy="12" r="4.4" fill="none" stroke="currentColor" stroke-width="1.9"/><circle cx="17.3" cy="6.7" r="1.25" fill="currentColor"/></symbol>
+<symbol id="i-tt" viewBox="0 0 24 24"><path fill="currentColor" d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></symbol></svg>
 
-  <main>
-    <!-- Первый экран -->
-    <div class="hero">
-      <div class="glow glow-a"></div>
-      <div class="glow glow-b"></div>
+<div class="navbar">
+ <header class="nav">
+  <a class="logo" href="#" aria-label="ivanoff.pro — в начало страницы">ivanoff<i>.pro</i></a>
+  <div class="right"><a class="soc" href="https://www.instagram.com/its.ivanoff/" target="_blank" rel="noopener" aria-label="Instagram its.ivanoff"><svg aria-hidden="true"><use href="#i-ig"/></svg></a><a class="soc" href="https://www.tiktok.com/@its.ivanoff" target="_blank" rel="noopener" aria-label="TikTok its.ivanoff"><svg aria-hidden="true"><use href="#i-tt"/></svg></a><a class="btn btn-s" href="#form">Разобрать мою задачу <span class="ar"><svg><use href="#i-arrow"/></svg></span></a></div>
+ </header>
+</div>
 
-      <div class="container hero-grid">
-        <div>
-          <div class="pill rise"><i></i>Бесплатный разбор задачи</div>
-          <h1 class="rise d1">Подписка на&nbsp;нейросеть есть, а&nbsp;<span class="hl">рутина никуда не&nbsp;делась?</span></h1>
-          <p class="lead rise d2">Разберу ваш процесс и пришлю письменно, <b>что можно автоматизировать, как и за какой срок.</b> Бесплатно.</p>
-        </div>
+<div class="wrap">
+ <!-- Блок 1. Первый экран -->
+ <section class="hero">
+  <div>
+   <div class="who" data-in><img class="ava" src="img/evgeny.jpg" alt="" width="40" height="40">Евгений · its.ivanoff · AI и автоматизация для малого бизнеса</div>
+   <h1 aria-label="Оплатили ChatGPT или Claude, а рутина никуда не делась?"><span aria-hidden="true"><span class="w" style="--i:0"><span>Оплатили</span></span> <span class="w" style="--i:1"><span>ChatGPT</span></span> <span class="w" style="--i:2"><span>или</span></span> <span class="w" style="--i:3"><span>Claude,</span></span> <span class="w" style="--i:4"><span>а&nbsp;рутина</span></span> <span class="w" style="--i:5"><span>никуда</span></span> <span class="w" style="--i:6"><span>не&nbsp;делась?</span></span></span></h1>
+   <p class="lead" data-in style="--d:520">Делаю AI-агентов и ботов — программы, которые сами переносят заявки, отвечают клиентам и собирают отчёты по деньгам. Запись и оплаты ведёт код, а нейросеть — только то, где её ошибка не стоит денег.</p>
+   <p class="proof" data-in style="--d:640"><span class="pill" data-count="30">+30%</span><span>Пример — сеть йога-студий: бот забрал расписание, а анализ цифр из CRM дал +30% к выручке и на 40% меньше отмен учениками.</span></p>
+   <div data-in style="--d:760">
+    <a class="btn" href="#form">Разобрать мою задачу <span class="ar"><svg><use href="#i-arrow"/></svg></span></a>
+    <p class="under">Нужен только Telegram. План с ценой и сроком — бесплатно и останется у вас.</p>
+    <a class="pricelink" href="#price">Сколько стоит <span class="dn">↓</span></a>
+   </div>
+  </div>
+  <div class="panel scene" data-in style="--d:560" aria-hidden="true">
+   <div class="board">
 
-        <div class="card rise d3" id="form">
-          <p class="card-title">Заявка на разбор</p>
-          <p class="card-sub">Три поля. Отвечу лично в течение дня.</p>
-
-          <form id="lead-form" novalidate>
-            <div class="field">
-              <label for="telegram">Telegram</label>
-              <input id="telegram" name="telegram" type="text" placeholder="@username или номер телефона" autocomplete="off" autocapitalize="off" spellcheck="false" required>
-              <div class="error-text">Укажите ник в Telegram или номер</div>
-            </div>
-
-            <div class="field">
-              <label for="business">Сфера бизнеса</label>
-              <input id="business" name="business" type="text" placeholder="Например, сеть студий йоги" required>
-              <div class="error-text">Расскажите, чем занимается бизнес</div>
-            </div>
-
-            <div class="field">
-              <label for="task">Что хотите автоматизировать <span class="optional">— необязательно</span></label>
-              <textarea id="task" name="task" placeholder="Какая рутина съедает больше всего времени"></textarea>
-            </div>
-
-            <!-- Ловушка для ботов: люди это поле не видят -->
-            <div class="honeypot" aria-hidden="true">
-              <label for="_honey">Не заполняйте</label>
-              <input id="_honey" name="_honey" type="text" tabindex="-1" autocomplete="off">
-            </div>
-
-            <button class="btn" type="submit" id="submit">Узнать, что можно автоматизировать в моём бизнесе</button>
-            <p class="status" id="status" role="alert"></p>
-            <p class="form-note">Данные нужны только чтобы связаться с вами.</p>
-          </form>
-
-          <div class="done" id="done" role="status">
-            <svg class="check" viewBox="0 0 84 84" aria-hidden="true">
-              <circle cx="42" cy="42" r="38"/>
-              <path d="M26 43.5 37.5 55 59 31"/>
-            </svg>
-            <p class="done-title">Заявка отправлена</p>
-            <p>Спасибо, отвечу лично в течение дня.</p>
-          </div>
-        </div>
-      </div>
+    <!-- Акт 1: заявка из Telegram сама попадает в CRM -->
+    <div class="act a1">
+     <svg class="wire" viewBox="0 0 334 240" fill="none"><path class="w-line" d="M202 52H246Q270 52 270 76V104" pathLength="100"/><path class="w-dot" d="M202 52H246Q270 52 270 76V104" pathLength="100"/></svg>
+     <div class="m-card msg"><span class="av">А</span><div><b>Анна</b><p>Можно записаться на завтра в 19:00?</p></div></div>
+     <div class="m-card crm">
+      <div class="crm-h"><b>Заявки</b><i>CRM</i></div>
+      <div class="row new"><b>Анна</b><span>завтра, 19:00</span><svg class="ok" viewBox="0 0 20 20"><circle cx="10" cy="10" r="10"/><path d="M6 10.4l2.7 2.7L14 7.5"/></svg></div>
+      <div class="row sk"><i></i><i></i><i></i></div>
+      <div class="row sk"><i></i><i></i><i></i></div>
+     </div>
     </div>
 
-    <!-- Бегущая строка с рутиной -->
-    <div class="ticker" aria-hidden="true">
-      <div class="ticker-track">
-        <span>расписание</span><span>сверки</span><span>обновление сайта</span><span>согласования</span><span>переносы</span><span>отмены</span><span>одни данные в трёх местах</span>
-        <span>расписание</span><span>сверки</span><span>обновление сайта</span><span>согласования</span><span>переносы</span><span>отмены</span><span>одни данные в трёх местах</span>
+    <!-- Акт 2: бот отвечает клиенту ночью -->
+    <div class="act a2">
+     <div class="m-card chat">
+      <div class="chat-h"><span class="bot"><svg viewBox="0 0 24 24"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2M20 14h2M15 13v2M9 13v2"/></svg></span><div><b>Ваш бот</b><small>в Telegram</small></div></div>
+      <div class="chat-b">
+       <div class="bub out">Вы работаете в воскресенье?<time>02:14</time></div>
+       <div class="slot">
+        <div class="bub in typing"><i></i><i></i><i></i></div>
+        <div class="bub in ans">Да, с 9:00 до 21:00. Записать вас?<time>02:14</time></div>
+       </div>
       </div>
+     </div>
     </div>
 
-    <!-- Боли -->
-    <section>
-      <div class="container">
-        <span class="eyebrow reveal">Знакомо?</span>
-        <h2 class="reveal">Бизнес растёт, а вы упираетесь в собственные руки</h2>
+    <!-- Акт 3: цифры из сервисов собираются в сводку -->
+    <div class="act a3 on">
+     <svg class="wire" viewBox="0 0 334 240" fill="none"><path class="w-line l1" d="M92 45C118 45 110 120 136 120" pathLength="100"/><path class="w-line l2" d="M92 120H136" pathLength="100"/><path class="w-line l3" d="M92 195C118 195 110 120 136 120" pathLength="100"/><path class="w-dot l1" d="M92 45C118 45 110 120 136 120" pathLength="100"/><path class="w-dot l2" d="M92 120H136" pathLength="100"/><path class="w-dot l3" d="M92 195C118 195 110 120 136 120" pathLength="100"/></svg>
+     <span class="chip c1">CRM</span><span class="chip c2">Оплаты</span><span class="chip c3">Запись</span>
+     <div class="m-card rep">
+      <b class="rep-t">Сводка за неделю</b>
+      <div class="bars"><i style="--h:38%;--n:0"></i><i style="--h:56%;--n:1"></i><i style="--h:44%;--n:2"></i><i style="--h:68%;--n:3"></i><i style="--h:60%;--n:4"></i><i style="--h:82%;--n:5"></i><i style="--h:100%;--n:6"></i></div>
+      <div class="rrow"><span>Не вернулись</span><b>6</b></div>
+      <div class="rrow"><span>Заявки без ответа</span><b>3</b></div>
+     </div>
+    </div>
 
-        <div class="pains">
-          <div class="tile pain reveal">
-            <span class="pain-num">01</span>
-            <p>Вся операционка замкнута на мне: без меня ничего не подтверждается</p>
-          </div>
-          <div class="tile pain reveal" style="--d:.08s">
-            <span class="pain-num">02</span>
-            <p>Каждую неделю трачу часы на одно и то же: расписание, сверки, обновление сайта</p>
-          </div>
-          <div class="tile pain reveal">
-            <span class="pain-num">03</span>
-            <p>Дам сотрудникам доступ — наделают ошибок. Не дам — всё делаю сам</p>
-          </div>
-          <div class="tile pain reveal" style="--d:.08s">
-            <span class="pain-num">04</span>
-            <p>Собрал автоматизацию сам, а она ломается и удаляет нужное</p>
-          </div>
-        </div>
-      </div>
-    </section>
+   </div>
+   <div class="stack">
+    <div class="ghost g2"></div>
+    <div class="ghost g1"></div>
+    <ul class="card routine" id="routine">
+     <li class="it done"><svg class="chk" viewBox="0 0 28 28"><circle class="c-base" cx="14" cy="14" r="12.25"/><circle class="c-ring" cx="14" cy="14" r="12.25" pathLength="100" transform="rotate(-90 14 14)"/><circle class="c-fill" cx="14" cy="14" r="13"/><path class="c-tick" d="M8.6 14.5l3.6 3.6 7.2-7.7" pathLength="100"/></svg><span class="tw"><span class="t">переносит заявки</span></span></li>
+     <li class="it done"><svg class="chk" viewBox="0 0 28 28"><circle class="c-base" cx="14" cy="14" r="12.25"/><circle class="c-ring" cx="14" cy="14" r="12.25" pathLength="100" transform="rotate(-90 14 14)"/><circle class="c-fill" cx="14" cy="14" r="13"/><path class="c-tick" d="M8.6 14.5l3.6 3.6 7.2-7.7" pathLength="100"/></svg><span class="tw"><span class="t">отвечает клиентам</span></span></li>
+     <li class="it"><svg class="chk" viewBox="0 0 28 28"><circle class="c-base" cx="14" cy="14" r="12.25"/><circle class="c-ring" cx="14" cy="14" r="12.25" pathLength="100" transform="rotate(-90 14 14)"/><circle class="c-fill" cx="14" cy="14" r="13"/><path class="c-tick" d="M8.6 14.5l3.6 3.6 7.2-7.7" pathLength="100"/></svg><span class="tw"><span class="t">собирает отчёты по деньгам</span></span></li>
+    </ul>
+   </div>
+  </div>
+ </section>
+</div>
 
-    <!-- Кейс -->
-    <section>
-      <div class="container">
-        <span class="eyebrow reveal">Пример из работы</span>
-        <h2 class="reveal">Расписание учителей в&nbsp;сети <span class="nowrap">йога-студий</span></h2>
+<!-- Блок 2. Почему ломается -->
+<div class="wrap"><section class="s s-why">
+ <h2 data-split>Почему автоматизация на одной нейросети ломается</h2>
+ <p class="sub" data-rv style="--d:150"><b>Нейросеть не видит всей логики вашего бизнеса.</b> На простых случаях всё выглядит рабочим, на первом нестандартном — ломается.</p>
+ <div class="why">
+  <p class="why-p" data-rv>Так было у руководителя сети йога-студий, с которым я потом работал. Он подключил Claude к гугл-таблице, и нейросеть сама заходила в сервисы и кликала за него:</p>
 
-        <div class="case-grid">
-          <div class="tile reveal">
-            <span class="tag">Было</span>
-            <ul class="list">
-              <li>Всё расписание шло через руководителя</li>
-              <li>Дать учителям доступ в CRM значило потерять контроль</li>
-              <li>Сайт обновлялся вручную раз в неделю</li>
-              <li>Claude, подключённый к гугл-таблице и браузеру, ломал и удалял лишнее</li>
-            </ul>
-          </div>
-          <div class="tile reveal" style="--d:.08s">
-            <span class="tag now">Стало</span>
-            <ul class="list ok">
-              <li>Учителя сами ставят и отменяют занятия в Telegram-боте</li>
-              <li>Руководитель подтверждает одной кнопкой</li>
-              <li>Расписание на сайте обновляется само</li>
-              <li>Это делает код, а не нейросеть в браузере, поэтому багов меньше</li>
-            </ul>
-          </div>
-        </div>
+  <!-- Сцена: нейросеть «кликает» в таблице и ломает её четырьмя способами из списка -->
+  <div class="panel scene why-scene" id="why-scene" data-rv aria-hidden="true">
+   <div class="board b2">
+    <div class="m-card sheet">
+     <div class="sh-h">
+      <svg class="sh-ic" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>
+      <b>Расписание</b>
+      <svg class="sh-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path class="h-min" d="M12 12V6.5"/><path class="h-hr" d="M12 12h3.5"/></svg>
+     </div>
+     <div class="sh-row sh-head"><span>День</span><span>Занятие</span><span>Учитель</span></div>
+     <div class="sh-body">
+      <div class="sh-row"><span>Пн 19:00</span><span>Хатха</span><span>Анна</span></div>
+      <div class="sh-row"><span>Вт 10:00</span><span>Виньяса</span><span>Мария</span></div>
+      <div class="sh-row"><span>Ср 19:00</span><span>Хатха</span><span>Анна</span></div>
+      <div class="sh-row"><span>Чт 20:00</span><span>Инь-йога</span><span>Ольга</span></div>
+      <div class="sh-row"><span>Сб 11:00</span><span>Виньяса</span><span>Мария</span></div>
+     </div>
+     <div class="sh-off"><svg viewBox="0 0 24 24"><path d="M12 3v9"/><path d="M6.3 6.8a8 8 0 1 0 11.4 0"/></svg></div>
+    </div>
+    <div class="cur ai"><svg viewBox="0 0 24 24"><path d="M5 3l14 7.6-6.3 1.7L10.4 18.6z"/></svg><i>нейросеть<span class="spin"></span></i></div>
+    <div class="cur me"><svg viewBox="0 0 24 24"><path d="M5 3l14 7.6-6.3 1.7L10.4 18.6z"/></svg><i>руководитель</i></div>
+   </div>
+  </div>
 
-        <div class="tile pipe reveal">
-          <div class="pipe-node">
-            <span class="pipe-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4 3 11l6 2.5M21 4l-4 16-8-6.5M21 4 9 13.5V19l3-3"/></svg>
-            </span>
-            <span><b>Учитель</b><small>ставит занятие в боте</small></span>
-          </div>
-          <div class="pipe-line"></div>
-          <div class="pipe-node">
-            <span class="pipe-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>
-            </span>
-            <span><b>Руководитель</b><small>жмёт одну кнопку</small></span>
-          </div>
-          <div class="pipe-line second"></div>
-          <div class="pipe-node">
-            <span class="pipe-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="15" rx="2.5"/><path d="M3 9.5h18"/></svg>
-            </span>
-            <span><b>Сайт</b><small>обновляется сам</small></span>
-          </div>
-        </div>
+  <ul class="fails" id="fails" data-rv>
+   <li class="fail it done"><svg class="chk" viewBox="0 0 28 28"><circle class="c-base" cx="14" cy="14" r="12.25"/><circle class="c-ring" cx="14" cy="14" r="12.25" pathLength="100" transform="rotate(-90 14 14)"/><circle class="c-fill" cx="14" cy="14" r="13"/><path class="c-tick" d="M10 10l8 8M18 10l-8 8" pathLength="100"/></svg><span>работало медленно;</span></li>
+   <li class="fail it done"><svg class="chk" viewBox="0 0 28 28"><circle class="c-base" cx="14" cy="14" r="12.25"/><circle class="c-ring" cx="14" cy="14" r="12.25" pathLength="100" transform="rotate(-90 14 14)"/><circle class="c-fill" cx="14" cy="14" r="13"/><path class="c-tick" d="M10 10l8 8M18 10l-8 8" pathLength="100"/></svg><span>удаляло лишнее, а однажды снесло все данные;</span></li>
+   <li class="fail it done"><svg class="chk" viewBox="0 0 28 28"><circle class="c-base" cx="14" cy="14" r="12.25"/><circle class="c-ring" cx="14" cy="14" r="12.25" pathLength="100" transform="rotate(-90 14 14)"/><circle class="c-fill" cx="14" cy="14" r="13"/><path class="c-tick" d="M10 10l8 8M18 10l-8 8" pathLength="100"/></svg><span>работало, только пока включён его компьютер;</span></li>
+   <li class="fail it done"><svg class="chk" viewBox="0 0 28 28"><circle class="c-base" cx="14" cy="14" r="12.25"/><circle class="c-ring" cx="14" cy="14" r="12.25" pathLength="100" transform="rotate(-90 14 14)"/><circle class="c-fill" cx="14" cy="14" r="13"/><path class="c-tick" d="M10 10l8 8M18 10l-8 8" pathLength="100"/></svg><span>таблицу он всё равно вёл сам.</span></li>
+  </ul>
 
-        <div class="facts reveal">
-          <div class="fact"><strong>3 дня</strong><span>от задачи до работающего бота</span></div>
-        </div>
-      </div>
-    </section>
+  <p class="callout" data-rv><svg viewBox="0 0 28 28" aria-hidden="true"><circle cx="14" cy="14" r="12.5"/><path class="ck" d="M8.6 14.5l3.6 3.6 7.2-7.7" pathLength="100"/></svg><span>Поэтому в боте, который я потом ему сделал, запись, расписание и данные ведёт код.</span></p>
+ </div>
+</section></div>
 
-    <!-- Как проходит разбор -->
-    <section>
-      <div class="container">
-        <span class="eyebrow reveal">Как проходит разбор</span>
-        <h2 class="reveal">Три шага, и у вас на руках письменный ответ</h2>
+<!-- Блок 3. Пример -->
+<div class="sec"><section class="case"><div class="wrap">
+ <span class="tag" data-rv>Пример</span>
+ <h2 data-split>Сеть йога-студий: выручка +30% после анализа цифр из CRM</h2>
+ <p class="sub" data-rv style="--d:150">Тот самый клиент. Сначала бот для расписания, потом анализ цифр. Telegram-бот + CRM Momence + сайт на Tilda</p>
 
-        <div class="steps">
-          <div class="tile step reveal">
-            <h3>Оставляете заявку</h3>
-            <p>Telegram, сфера бизнеса и пара слов о рутине, если хочется.</p>
-          </div>
-          <div class="tile step reveal" style="--d:.08s">
-            <h3>Задаю пару вопросов</h3>
-            <p>Пишу вам лично в Telegram в течение дня.</p>
-          </div>
-          <div class="tile step reveal" style="--d:.16s">
-            <h3>Присылаю разбор</h3>
-            <p>Письменно: что можно автоматизировать, как и за какой срок. Бесплатно.</p>
-          </div>
-        </div>
-      </div>
-    </section>
+ <!-- Сцена: отмена занятия проходит по цепочке — учитель, руководитель, CRM, сайт -->
+ <div class="scene flow" id="flow" data-rv>
+  <div class="board b3" aria-hidden="true">
 
-    <!-- Финал -->
-    <section class="final">
-      <div class="container">
-        <div class="final-box reveal">
-          <h2>Какая рутина съедает у вас больше всего времени?</h2>
-          <p>Расскажите о ней, и я посмотрю, автоматизируется ли она.</p>
-          <a class="btn" href="#form">Узнать, что можно автоматизировать в моём бизнесе</a>
-        </div>
-      </div>
-    </section>
-  </main>
+   <div class="stage s1 on hit">
+    <div class="st-h"><span class="tgi"><svg viewBox="0 0 24 24"><path d="M20.5 4.2 3.6 10.7c-.9.4-.9 1.1-.2 1.3l4.3 1.4 1.7 5.1c.2.6.4.8.8.8s.6-.2.9-.5l2.1-2 4.3 3.2c.8.4 1.4.2 1.6-.7l2.8-13.4c.3-1.2-.4-1.7-1.4-1.300z"/></svg></span><b>Telegram · учитель</b></div>
+    <div class="st-b">
+     <div class="bub in lesson"><b>Ср 19:00</b> Хатха</div>
+     <div class="tgbtn solo">Отменить занятие<i class="tapdot"></i></div>
+     <div class="st-note"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="10"/><path d="M6 10.4l2.7 2.7L14 7.5"/></svg>Ждём руководителя</div>
+    </div>
+   </div>
+   <i class="wire3"></i>
 
-  <script>
-    /* ===== Форма ===== */
-    // Заявки уходят через FormSubmit (formsubmit.co) — без сервера и регистрации.
-    // После активации можно заменить почту на секретный адрес из письма FormSubmit.
-    var ENDPOINT = "https://formsubmit.co/ajax/effjkeee@gmail.com";
+   <div class="stage s2 on hit">
+    <div class="st-h"><span class="tgi"><svg viewBox="0 0 24 24"><path d="M20.5 4.2 3.6 10.7c-.9.4-.9 1.1-.2 1.3l4.3 1.4 1.7 5.1c.2.6.4.8.8.8s.6-.2.9-.5l2.1-2 4.3 3.2c.8.4 1.4.2 1.6-.7l2.8-13.4c.3-1.2-.4-1.7-1.4-1.300z"/></svg></span><b>Telegram · руководитель</b></div>
+    <div class="st-b">
+     <div class="bub in req"><span><i class="nm"></i>отменяет занятие</span><b>Ср 19:00 · Хатха</b></div>
+     <div class="tgrow"><div class="tgbtn yes">Подтвердить<i class="tapdot"></i></div><div class="tgbtn no">Отклонить</div></div>
+    </div>
+   </div>
+   <i class="wire3"></i>
 
-    var form = document.getElementById("lead-form");
-    var card = document.getElementById("form");
-    var button = document.getElementById("submit");
-    var statusEl = document.getElementById("status");
-    var buttonText = button.textContent;
+   <div class="stage s3 on hit">
+    <div class="st-h"><svg class="st-ic" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/></svg><b>CRM Momence</b><span class="sync"><span class="spin dk"></span><svg class="ok" viewBox="0 0 20 20"><circle cx="10" cy="10" r="10"/><path d="M6 10.4l2.7 2.7L14 7.5"/></svg></span></div>
+    <div class="st-b tbl">
+     <div class="trow sk"><i></i><i></i></div>
+     <div class="trow key"><span class="tx"><b>Ср 19:00</b> Хатха</span><em>отменено</em></div>
+     <div class="trow sk"><i></i><i></i></div>
+     <div class="trow sk"><i></i><i></i></div>
+    </div>
+   </div>
+   <i class="wire3"></i>
 
-    function setError(input, hasError) {
-      input.classList.toggle("invalid", hasError);
-      input.closest(".field").classList.toggle("has-error", hasError);
-    }
+   <div class="stage s4 on hit focus">
+    <div class="st-h"><svg class="st-ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5"/><path d="M2.5 12h19"/><path d="M12 2.5a14 14 0 0 1 0 19a14 14 0 0 1 0-19"/></svg><b>Сайт на Tilda</b><span class="sync"><span class="spin dk"></span><svg class="ok" viewBox="0 0 20 20"><circle cx="10" cy="10" r="10"/><path d="M6 10.4l2.7 2.7L14 7.5"/></svg></span></div>
+    <div class="st-b site">
+     <b class="site-t">Расписание</b>
+     <div class="srow"><span class="tx"><b>Пн 19:00</b> Хатха</span></div>
+     <div class="srow key"><span class="tx"><b>Ср 19:00</b> Хатха</span><em>отменено</em></div>
+     <div class="srow"><span class="tx"><b>Чт 20:00</b> Инь-йога</span></div>
+    </div>
+   </div>
 
-    function isValidTelegram(value) {
-      var v = value.trim();
-      // @username / username (5–32 символа), ссылка t.me/username или номер телефона
-      return /^@?[a-zA-Z0-9_]{5,32}$/.test(v) ||
-             /^(https?:\/\/)?t\.me\/[a-zA-Z0-9_]{5,32}\/?$/.test(v) ||
-             /^\+?[\d\s()-]{7,20}$/.test(v);
-    }
+  </div>
+  <ol class="chain" id="chain">
+   <li class="it done"><svg class="chk" viewBox="0 0 28 28" aria-hidden="true"><circle class="c-base" cx="14" cy="14" r="12.25"/><circle class="c-ring" cx="14" cy="14" r="12.25" pathLength="100" transform="rotate(-90 14 14)"/><circle class="c-fill" cx="14" cy="14" r="13"/><path class="c-tick" d="M8.6 14.5l3.6 3.6 7.2-7.7" pathLength="100"/></svg><span>Учитель отменяет занятие в боте</span></li>
+   <li class="it done"><svg class="chk" viewBox="0 0 28 28" aria-hidden="true"><circle class="c-base" cx="14" cy="14" r="12.25"/><circle class="c-ring" cx="14" cy="14" r="12.25" pathLength="100" transform="rotate(-90 14 14)"/><circle class="c-fill" cx="14" cy="14" r="13"/><path class="c-tick" d="M8.6 14.5l3.6 3.6 7.2-7.7" pathLength="100"/></svg><span>руководитель жмёт «Подтвердить»</span></li>
+   <li class="it done"><svg class="chk" viewBox="0 0 28 28" aria-hidden="true"><circle class="c-base" cx="14" cy="14" r="12.25"/><circle class="c-ring" cx="14" cy="14" r="12.25" pathLength="100" transform="rotate(-90 14 14)"/><circle class="c-fill" cx="14" cy="14" r="13"/><path class="c-tick" d="M8.6 14.5l3.6 3.6 7.2-7.7" pathLength="100"/></svg><span>Momence обновлена</span></li>
+   <li class="it done"><svg class="chk" viewBox="0 0 28 28" aria-hidden="true"><circle class="c-base" cx="14" cy="14" r="12.25"/><circle class="c-ring" cx="14" cy="14" r="12.25" pathLength="100" transform="rotate(-90 14 14)"/><circle class="c-fill" cx="14" cy="14" r="13"/><path class="c-tick" d="M8.6 14.5l3.6 3.6 7.2-7.7" pathLength="100"/></svg><span>сайт обновлён</span></li>
+  </ol>
+ </div>
 
-    ["telegram", "business"].forEach(function (id) {
-      var el = document.getElementById(id);
-      el.addEventListener("input", function () { setError(el, false); });
-    });
+ <div class="nums">
+  <div class="n" data-rv><b data-count>+30%</b> <span>Выручка — после того, как внедрили часть выводов</span></div>
+  <div class="n" data-rv style="--d:90"><b data-count>−40%</b> <span>Отмен учениками на 40% меньше</span></div>
+  <div class="n" data-rv style="--d:180"><b data-count>−50%</b> <span>Отмен со стороны учителей — на 50% меньше</span></div>
+  <div class="n" data-rv style="--d:270"><b>Неделя</b> <span>от задачи до работающего бота</span></div>
+ </div>
 
-    form.addEventListener("submit", function (e) {
-      e.preventDefault();
-      statusEl.textContent = "";
+ <!-- Видео бота и скриншот сводки временно убраны 19.11.2026, пока Евгений готовит материалы.
+      Что и куда вернуть — «Лендинг ivanoff.pro/Что доделать на сайте.md» -->
+ <div class="proofRow">
+  <div class="wins">
+   <div class="win" data-rv style="--d:100"><b>Сайт руками больше не правят,</b> <span>расписание можно менять почти каждый день, а не раз в месяц.</span></div>
+   <div class="win" data-rv style="--d:200"><b>Работает круглосуточно,</b> <span>компьютер руководителя не нужен.</span></div>
+  </div>
+ </div>
+ <div class="accs" data-rv>
+  <!-- этапы всегда раскрыты: решение Евгения от 19.11.2026 -->
+  <div class="acc"><h3>Этап 1. Бот для расписания</h3>
+   <div class="accb txt"><ul>
+    <li><b>Учителя не могли менять расписание сами:</b> полный доступ к CRM им не дашь. Каждую отмену руководитель руками переносил на сайт и в соцсети — каждый день. Чаще раза в месяц менять расписание было не потянуть.</li>
+    <li><b>У Momence и Tilda нет открытого API</b> — подключиться «по инструкции» нельзя. Я разобрал, как они обмениваются данными внутри, и подключился напрямую. Студии не пришлось менять CRM и сайт.</li>
+    <li><b>Учитель отменяет — руководитель подтверждает.</b> Учитель сам ставит себя в расписание или отменяет занятие в Telegram-боте, руководителю приходит сообщение с кнопками «Подтвердить» и «Отклонить». Дальше данные уходят в Momence, а сайт обновляется.</li>
+    <li><b>70% времени — проверка каждого сценария,</b> включая редкие. Поэтому бот работает в студиях, а не только на демо.</li>
+   </ul>
+   </div>
+  </div>
+  <div class="acc"><h3>Этап 2. Анализ цифр из CRM</h3>
+   <div class="accb txt"><ul>
+    <li>После бота руководитель захотел идти дальше. Я выгрузил цифры из CRM: учителя, стили йоги, ученики — когда и как бронируют, что выбирают при оплате, что работает, а что нет.</li>
+    <li>С руководителем и его командой мы провели мозговой штурм по этим цифрам и составили план: убрать классы и стили, которые не работали, перенести стили к учителям, у которых они получаются, а новичков вести через учителей, которые лучше превращают их в постоянных учеников.</li>
+    <li>План команда студии внедрила сама. Через время мы сняли цифры снова.</li>
+    <li>Теперь нейросеть каждую неделю сама собирает руководителю сводку: что выросло и что упало за неделю.</li>
+   </ul>
+   </div>
+  </div>
+ </div>
+ <div class="afterCase" data-rv><span class="q">Похожая рутина у вас?</span><a class="btn" href="#form">Разобрать мою задачу <span class="ar"><svg><use href="#i-arrow"/></svg></span></a></div>
+</div></section></div>
 
-      var telegram = form.telegram;
-      var business = form.business;
-      var tgBad = !isValidTelegram(telegram.value);
-      var bizBad = business.value.trim().length < 2;
+<!-- Блок 4. Что могу забрать -->
+<div class="wrap"><section class="s">
+ <h2 data-split>Что могу забрать у вас</h2>
+ <p class="sub" data-rv style="--d:150">Подходит, если у вас есть заявки, запись и расписание: студии, салоны, школы, сервисы, магазины.</p>
+ <div class="svc">
 
-      setError(telegram, tgBad);
-      setError(business, bizBad);
-      if (tgBad) { telegram.focus(); return; }
-      if (bizBad) { business.focus(); return; }
+  <!-- у каждой боли своя маленькая живая картинка: играет, когда карточка в кадре -->
+  <details class="sv" data-rv>
+   <summary><h3>Не видно, где уходят деньги.</h3><span class="pm"></span></summary>
+   <div class="sv-b">
+    <div class="mini mi-money" aria-hidden="true"><div class="mi-in">
+     <div class="mm-bars"><i style="--h:62%"></i><i style="--h:80%"></i><i style="--h:70%"></i><i class="low" style="--h:30%"></i><i style="--h:74%"></i><i style="--h:88%"></i><i style="--h:80%"></i></div>
+     <span class="mm-scan"></span>
+     <span class="mm-tag">неявки</span>
+    </div></div>
+    <p>Собираю цифры из ваших сервисов, нейросеть разбирает их и каждую неделю присылает сводку: кто не вернулся, у кого неявки, какие заявки остались без ответа, у кого из сотрудников результат ниже.</p>
+   </div>
+  </details>
 
-      // Бот заполнил скрытое поле — делаем вид, что всё ок
-      if (form._honey.value) { card.classList.add("sent"); return; }
+  <details class="sv" data-rv style="--d:100">
+   <summary><h3>Каждую правку вносите руками в три места.</h3><span class="pm"></span></summary>
+   <div class="sv-b">
+    <div class="mini mi-sync" aria-hidden="true"><div class="mi-in">
+     <svg class="wire" viewBox="0 0 240 110" fill="none"><path class="w-line" d="M86 55C112 55 106 25 132 25" pathLength="100"/><path class="w-line" d="M86 55C112 55 106 85 132 85" pathLength="100"/><path class="w-dot d1" d="M86 55C112 55 106 25 132 25" pathLength="100"/><path class="w-dot d2" d="M86 55C112 55 106 85 132 85" pathLength="100"/></svg>
+     <div class="ms-chip c0"><small>CRM</small><span class="val"><i><b>19:00</b><b>20:00</b></i></span></div>
+     <div class="ms-chip c1"><small>Сайт</small><span class="val"><i><b>19:00</b><b>20:00</b></i></span></div>
+     <div class="ms-chip c2"><small>Таблица</small><span class="val"><i><b>19:00</b><b>20:00</b></i></span></div>
+    </div></div>
+    <p>Связываю CRM, запись, таблицы, сайт и оплаты: внесли в одном месте — обновилось в остальных. В том числе сервисы без открытого API. Получится ли с вашей CRM, скажу на разборе.</p>
+   </div>
+  </details>
 
-      button.disabled = true;
-      button.textContent = "Отправляю…";
+  <details class="sv" data-rv>
+   <summary><h3>Клиенты спрашивают одно и то же.</h3><span class="pm"></span></summary>
+   <div class="sv-b">
+    <div class="mini mi-faq" aria-hidden="true"><div class="mi-in">
+     <div class="mf-row"><span class="mf-q">Цена?</span><span class="mf-a"><i></i></span></div>
+     <div class="mf-row"><span class="mf-q">Адрес?</span><span class="mf-a"><i></i></span></div>
+     <div class="mf-row"><span class="mf-q">Как добраться?</span><span class="mf-a"><i></i></span></div>
+    </div></div>
+    <p>Бот в Telegram отвечает на частые вопросы — цены, адрес, как добраться, — даже ночью, а администратор не отвлекается. Запись и оплату оформляет код.</p>
+   </div>
+  </details>
 
-      fetch(ENDPOINT, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "Accept": "application/json" },
-        body: JSON.stringify({
-          "Telegram": telegram.value.trim(),
-          "Сфера бизнеса": business.value.trim(),
-          "Что автоматизировать": form.task.value.trim() || "—",
-          "_subject": "Новая заявка с сайта: " + business.value.trim(),
-          "_template": "table",
-          "_captcha": "false"
-        })
-      })
-        .then(function (res) { return res.json(); })
-        .then(function (data) {
-          if (data.success === true || data.success === "true") {
-            card.classList.add("sent");
-          } else {
-            throw new Error(data.message || "send failed");
-          }
-        })
-        .catch(function () {
-          statusEl.textContent = "Не получилось отправить. Попробуйте ещё раз через минуту.";
-          button.disabled = false;
-          button.textContent = buttonText;
-        });
-    });
+  <details class="sv" data-rv style="--d:100">
+   <summary><h3>Заявки висят без ответа.</h3><span class="pm"></span></summary>
+   <div class="sv-b">
+    <div class="mini mi-leads" aria-hidden="true"><div class="ml">
+     <div class="ml-h"><b>Без ответа</b><span class="ml-cnt"><i><u>3</u><u>2</u><u>1</u><u>0</u></i></span></div>
+     <div class="ml-row"><span class="av"></span><i class="ln"></i><svg class="ok" viewBox="0 0 20 20"><circle cx="10" cy="10" r="10"/><path d="M6 10.4l2.7 2.7L14 7.5"/></svg></div>
+     <div class="ml-row"><span class="av"></span><i class="ln"></i><svg class="ok" viewBox="0 0 20 20"><circle cx="10" cy="10" r="10"/><path d="M6 10.4l2.7 2.7L14 7.5"/></svg></div>
+     <div class="ml-row"><span class="av"></span><i class="ln"></i><svg class="ok" viewBox="0 0 20 20"><circle cx="10" cy="10" r="10"/><path d="M6 10.4l2.7 2.7L14 7.5"/></svg></div>
+    </div></div>
+    <p>Например, AI-агент каждое утро находит вчерашние заявки без ответа и пишет этим людям — клиенты, которые ушли бы к соседям, получают ответ. Тексты сообщений согласуем с вами до запуска.</p>
+   </div>
+  </details>
 
-    /* ===== Появление блоков при прокрутке ===== */
-    (function () {
-      var items = document.querySelectorAll(".reveal");
-      if (!("IntersectionObserver" in window)) {
-        items.forEach(function (el) { el.classList.add("in"); });
-        return;
-      }
-      var io = new IntersectionObserver(function (entries) {
-        entries.forEach(function (entry) {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("in");
-            io.unobserve(entry.target);
-          }
-        });
-      }, { threshold: 0.15, rootMargin: "0px 0px -40px 0px" });
-      items.forEach(function (el) { io.observe(el); });
-    })();
+  <details class="sv" data-rv>
+   <summary><h3>Договоры и счета собираете вручную.</h3><span class="pm"></span></summary>
+   <div class="sv-b">
+    <div class="mini mi-doc" aria-hidden="true"><div class="mi-in">
+     <svg class="wire" viewBox="0 0 240 110" fill="none"><path class="w-line" d="M80 55H128" pathLength="100"/><path class="w-dot" d="M80 55H128" pathLength="100"/></svg>
+     <div class="md-req"><small>Заявка</small><i></i><i></i></div>
+     <div class="md-doc"><small>Договор</small><i></i><i></i><i></i><i></i><svg class="ok" viewBox="0 0 20 20"><circle cx="10" cy="10" r="10"/><path d="M6 10.4l2.7 2.7L14 7.5"/></svg></div>
+    </div></div>
+    <p>Собираются сами из заявки — без ручного переноса и опечаток в реквизитах.</p>
+   </div>
+  </details>
 
-    /* ===== Подсветка карточек под курсором ===== */
-    document.querySelectorAll(".tile").forEach(function (tile) {
-      tile.addEventListener("pointermove", function (e) {
-        var r = tile.getBoundingClientRect();
-        tile.style.setProperty("--mx", (e.clientX - r.left) + "px");
-        tile.style.setProperty("--my", (e.clientY - r.top) + "px");
-      });
-    });
+  <div class="sv dark" data-rv style="--d:100">
+   <div class="mini mi-pick" aria-hidden="true"><div class="mp"><span>нейросеть</span><span>автоматизация</span><span>ничего не менять</span></div></div>
+   <h3>Не знаете, где вам пригодится нейросеть?</h3>
+   <p>На разборе скажу, где нейросеть сэкономит время, где хватит обычной автоматизации, а где ничего менять не нужно.</p>
+  </div>
+ </div>
+ <p class="note" data-rv>Вашей задачи нет в списке — разберу и её, если вы делаете это руками каждый день, и скажу, получится или нет.</p>
+ <div class="ctaRow" data-rv><a class="btn" href="#form">Разобрать мою задачу <span class="ar"><svg><use href="#i-arrow"/></svg></span></a></div>
+</section></div>
 
-    /* ===== Фон: сеть узлов, по которой бегут сигналы ===== */
-    (function () {
-      var canvas = document.getElementById("net");
-      if (!canvas || !canvas.getContext) return;
+<!-- Блок 5. Что будет после заявки -->
+<div class="wrap"><section class="s s-flat">
+ <h2 data-split>Что будет после заявки</h2>
+ <div class="after">
 
-      var ctx = canvas.getContext("2d");
-      var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      var w = 0, h = 0, nodes = [], pulses = [];
-      var mouse = { x: -9999, y: -9999 };
-      var LINK = 150;
+  <!-- Сцена: документ «План» заполняется по мере того, как прокрутка доходит до шагов -->
+  <div class="panel scene plan-scene" id="plan" aria-hidden="true"><div class="board b5">
+   <div class="m-card plan">
+    <div class="pl-h"><svg class="pl-ic" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg><b>План</b><span class="pl-for">для @ваш_ник</span><em class="pl-free">бесплатно</em></div>
+    <div class="pl-r q2"><span>Задача</span><i></i></div>
+    <div class="pl-r q3"><span>Что делаем</span><i></i></div>
+    <div class="pl-r q3 d1"><span>Срок</span><i class="sh"></i></div>
+    <div class="pl-r q3 d2"><span>Цена</span><i class="sh"></i></div>
+    <div class="pl-st"><span class="pst"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="10"/><path d="M6 10.4l2.7 2.7L14 7.5"/></svg>Этап 1</span><span class="pst"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="10"/><path d="M6 10.4l2.7 2.7L14 7.5"/></svg>Этап 2</span><span class="pst"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="10"/><path d="M6 10.4l2.7 2.7L14 7.5"/></svg>Этап 3</span></div>
+    <div class="pl-f"><span class="pst go"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="10"/><path d="M6 10.4l2.7 2.7L14 7.5"/></svg>Запуск</span><span class="pl-file"><svg viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg>Инструкция</span></div>
+   </div>
+  </div></div>
 
-      function resize(force) {
-        var nw = document.documentElement.clientWidth, nh = window.innerHeight;
-        // На телефоне высота прыгает из-за адресной строки — узлы не пересоздаём
-        var sameWidth = nw === w;
-        w = nw; h = nh;
-        var dpr = Math.min(window.devicePixelRatio || 1, 2);
-        canvas.width = w * dpr;
-        canvas.height = h * dpr;
-        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-        if (sameWidth && !force) return;
+  <ol class="steps" id="steps">
+   <li class="st"><span class="num">1</span><div><b>Вы оставляете Telegram.</b> <span>Я пишу лично в течение дня.</span></div></li>
+   <li class="st"><span class="num">2</span><div><b>Разбор задачи</b> <span>— созвон на 20–30 минут или переписка, как удобнее. Спрашиваю про ваш процесс и ничего не презентую.</span></div></li>
+   <li class="st"><span class="num">3</span><div><b>В тот же день — письменный план:</b> <span>что делаем, как, за какой срок и сколько стоит. Не подойдёт — скажете «нет», уговаривать не буду.</span></div></li>
+   <li class="st"><span class="num">4</span><div><b>Если решаете делать,</b> <span>работаю по плану, этап за этапом.</span></div></li>
+   <li class="st"><span class="num">5</span><div><b>Запускаю</b> <span>и отдаю инструкцию.</span></div></li>
+  </ol>
+ </div>
+</section></div>
 
-        var count = Math.round(Math.min(80, (w * h) / 15000));
-        nodes = [];
-        pulses = [];
-        for (var i = 0; i < count; i++) {
-          nodes.push({
-            x: Math.random() * w,
-            y: Math.random() * h,
-            vx: (Math.random() - 0.5) * 0.28,
-            vy: (Math.random() - 0.5) * 0.28,
-            r: 1 + Math.random() * 1.4
-          });
-        }
-      }
+<!-- Блок 6. Цена -->
+<div class="sec" id="price"><section class="price"><div class="wrap">
+ <h2 data-split>Сколько стоит и как платить</h2>
+ <div class="pgrid">
+  <div class="pc p-bot" data-rv><div class="k">Бот на один процесс</div><div class="amt">от 60 000 ₽</div><p>например, запись клиентов из Telegram в одну CRM. Дороже выходит, если сервисов несколько, у них нет открытого API или в задаче есть нейросеть. Точную цену пишу в плане.</p></div>
 
-      function neighbour(a, except) {
-        var options = [];
-        for (var i = 0; i < nodes.length; i++) {
-          var b = nodes[i];
-          if (b === a || b === except) continue;
-          var dx = a.x - b.x, dy = a.y - b.y;
-          if (dx * dx + dy * dy < LINK * LINK) options.push(b);
-        }
-        return options.length ? options[Math.floor(Math.random() * options.length)] : null;
-      }
+  <!-- Главное в блоке — не цена, а действие читателя: двигает ползунок, видит свои часы за год, жмёт кнопку -->
+  <div class="pc calc" id="calc" data-rv style="--d:100">
+   <label class="calc-q" for="hrs">Сколько часов в неделю уходит на рутину?</label>
+   <div class="calc-h"><b id="hrsOut">6</b> <span id="hrsUnit">часов в неделю</span></div>
+   <input type="range" id="hrs" min="1" max="30" step="1" value="6">
+   <div class="calc-res" aria-live="polite">
+    <div class="calc-big"><b id="yrOut">312</b><span id="yrUnit">часов в год</span></div>
+    <small id="dayOut">это 39 рабочих дней</small>
+   </div>
+   <p class="hours">На разборе посчитаем, сколько часов в неделю у вас уходит на эту рутину, — сравните с ценой сами.</p>
+   <a class="btn" href="#form">Разобрать мою задачу <span class="ar"><svg><use href="#i-arrow"/></svg></span></a>
+  </div>
 
-      function spawnPulse() {
-        var a = nodes[Math.floor(Math.random() * nodes.length)];
-        var b = a && neighbour(a, null);
-        if (b) pulses.push({ a: a, b: b, t: 0, hops: 3 });
-      }
+  <div class="pc p-ai" data-rv><div class="k">AI-агенты и анализ данных</div><p>цена зависит от числа сервисов и объёма данных, называю её в плане после разбора. Начать можно с одной задачи — например, с еженедельной сводки по деньгам.</p></div>
+ </div>
+ <div class="plist" data-rv>
+  <div class="pl"><b>После запуска</b> остаются сервер и нейросеть: на боте вроде студийного 1000–2000 ₽ в месяц. Сумма тоже будет в плане.</div>
+  <div class="pl"><b>Оплата:</b> половина до начала, остальное — по мере того, как принимаете этапы. Этапы и суммы вы видите в плане до оплаты. На больших проектах оплату можно разбить на три части — договоримся в плане.
+   <div class="paybar" aria-hidden="true"><i class="half"></i><i></i><i></i><i></i></div>
+   <div class="paylbl" aria-hidden="true"><span>до начала</span><span>этапы</span></div>
+  </div>
+  <div class="pl"><b>Работаю как ИП,</b> по договору.</div>
+ </div>
+</div></section></div>
 
-      function draw() {
-        ctx.clearRect(0, 0, w, h);
-        var i, j, a, b, dx, dy, d;
+<!-- Блок 7. Гарантии -->
+<div class="wrap"><section class="s">
+ <h2 data-split>Что будет, если что-то пойдёт не так</h2>
+ <div class="gs">
 
-        for (i = 0; i < nodes.length; i++) {
-          a = nodes[i];
-          a.x += a.vx; a.y += a.vy;
-          if (a.x < -20) a.x = w + 20; else if (a.x > w + 20) a.x = -20;
-          if (a.y < -20) a.y = h + 20; else if (a.y > h + 20) a.y = -20;
-        }
+  <!-- страх слева, ответ посередине, справа картинка: как это выглядит на деле -->
+  <div class="g" data-rv>
+   <h3><svg class="shield" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path pathLength="100" d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path class="sh-ck" pathLength="100" d="m9 12 2 2 4-4"/></svg>Я пропаду.</h3>
+   <p>Код работает на вашем сервере, доступы и аккаунты я оформляю на вас, плюс инструкция. Держать вас на крючке я не смогу: всё, чтобы продолжить с другим разработчиком, останется у вас.</p>
+   <div class="mini mi-keep" aria-hidden="true"><div class="ml">
+    <div class="ml-h"><b>Остаётся у вас</b></div>
+    <div class="ml-row"><span>Код на вашем сервере</span><svg class="ok" viewBox="0 0 20 20"><circle cx="10" cy="10" r="10"/><path d="M6 10.4l2.7 2.7L14 7.5"/></svg></div>
+    <div class="ml-row"><span>Доступы и аккаунты</span><svg class="ok" viewBox="0 0 20 20"><circle cx="10" cy="10" r="10"/><path d="M6 10.4l2.7 2.7L14 7.5"/></svg></div>
+    <div class="ml-row"><span>Инструкция</span><svg class="ok" viewBox="0 0 20 20"><circle cx="10" cy="10" r="10"/><path d="M6 10.4l2.7 2.7L14 7.5"/></svg></div>
+   </div></div>
+  </div>
 
-        ctx.lineWidth = 1;
-        for (i = 0; i < nodes.length; i++) {
-          a = nodes[i];
-          for (j = i + 1; j < nodes.length; j++) {
-            b = nodes[j];
-            dx = a.x - b.x; dy = a.y - b.y;
-            d = Math.sqrt(dx * dx + dy * dy);
-            if (d < LINK) {
-              ctx.strokeStyle = "rgba(255,255,255," + (0.11 * (1 - d / LINK)).toFixed(3) + ")";
-              ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
-            }
-          }
-          // Связи с курсором
-          dx = a.x - mouse.x; dy = a.y - mouse.y;
-          d = Math.sqrt(dx * dx + dy * dy);
-          if (d < 190) {
-            ctx.strokeStyle = "rgba(200,255,62," + (0.38 * (1 - d / 190)).toFixed(3) + ")";
-            ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(mouse.x, mouse.y); ctx.stroke();
-          }
-          ctx.fillStyle = "rgba(255,255,255,.34)";
-          ctx.beginPath(); ctx.arc(a.x, a.y, a.r, 0, 6.2832); ctx.fill();
-        }
+  <div class="g" data-rv>
+   <h3><svg class="shield" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path pathLength="100" d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path class="sh-ck" pathLength="100" d="m9 12 2 2 4-4"/></svg>Этап не совпал с планом.</h3>
+   <p>Дорабатываю, пока не совпадёт. Если не выходит, обсуждаем, какую часть оплаты вернуть.</p>
+   <div class="mini mi-match" aria-hidden="true"><div class="mi-in">
+    <div class="mg-col"><small>План</small><i></i><i></i><i></i></div>
+    <div class="mg-col mg-b"><small>Этап</small><i></i><i class="fix"></i><i></i></div>
+    <svg class="ok" viewBox="0 0 20 20"><circle cx="10" cy="10" r="10"/><path d="M6 10.4l2.7 2.7L14 7.5"/></svg>
+   </div></div>
+  </div>
 
-        // Сигналы: бегут от узла к узлу и перескакивают дальше
-        for (i = pulses.length - 1; i >= 0; i--) {
-          var p = pulses[i];
-          p.t += 0.022;
-          if (p.t >= 1) {
-            var next = p.hops > 0 ? neighbour(p.b, p.a) : null;
-            if (next) { p.a = p.b; p.b = next; p.t = 0; p.hops--; }
-            else { pulses.splice(i, 1); continue; }
-          }
-          var x = p.a.x + (p.b.x - p.a.x) * p.t;
-          var y = p.a.y + (p.b.y - p.a.y) * p.t;
-          ctx.strokeStyle = "rgba(200,255,62,.3)";
-          ctx.beginPath(); ctx.moveTo(p.a.x, p.a.y); ctx.lineTo(x, y); ctx.stroke();
-          ctx.fillStyle = "#c8ff3e";
-          ctx.shadowColor = "#c8ff3e";
-          ctx.shadowBlur = 12;
-          ctx.beginPath(); ctx.arc(x, y, 2.2, 0, 6.2832); ctx.fill();
-          ctx.shadowBlur = 0;
-        }
+  <div class="g" data-rv>
+   <h3><svg class="shield" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path pathLength="100" d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path class="sh-ck" pathLength="100" d="m9 12 2 2 4-4"/></svg>Что-то сломалось или сервис без API что-то поменял у себя.</h3>
+   <p>Бот сообщает об ошибке, я чиню за один рабочий день. Первые 7 дней после запуска — бесплатно, дальше — по условиям и цене из плана, вы видите их до оплаты.</p>
+   <div class="mini mi-fix" aria-hidden="true"><div class="mi-in">
+    <svg class="mx-ring" viewBox="0 0 48 48"><circle class="tr" cx="24" cy="24" r="20"/><circle class="pr" cx="24" cy="24" r="20" pathLength="100" transform="rotate(-90 24 24)"/><path class="hand" d="M24 13v11l7 4"/><path class="tk" d="M15.5 24.5l5.8 5.8 11.2-12.2" pathLength="100"/></svg>
+    <div class="ms-chip mx-chip"><small>Бот сообщил</small><span class="val"><i><b>ошибка</b><b>починено</b></i></span></div>
+   </div></div>
+  </div>
+ </div>
+ <div class="ctaRow" data-rv><a class="btn" href="#form">Разобрать мою задачу <span class="ar"><svg><use href="#i-arrow"/></svg></span></a></div>
+</section></div>
 
-        if (!reduce && pulses.length < 5 && Math.random() < 0.04) spawnPulse();
-      }
+<!-- Блок 8. Кто это делает -->
+<div class="wrap"><section class="s s-flat">
+ <div class="about">
+  <div>
+   <div class="about-h" data-rv><img class="ava-l" src="img/evgeny.jpg" alt="Евгений" width="112" height="112" loading="lazy"><h2>Кто это делает</h2></div>
+   <div class="txt">
+    <p class="big" data-rv>Я Евгений, fullstack-разработчик: сам пишу ботов, агентов и их связи с CRM, сайтом, таблицами и нейросетью.</p>
+    <p data-rv>Вы говорите с тем, кто делает работу, а не с менеджером, который пересказывает задачу программисту.</p>
+    <p data-rv>Если вы пришли из моих роликов в <a href="https://www.instagram.com/its.ivanoff/" target="_blank" rel="noopener">its.ivanoff</a> — там я разбираю такие проекты изнутри. Здесь можно заказать такой же для своего бизнеса.</p>
+   </div>
+  </div>
 
-      function loop() {
-        draw();
-        if (!document.hidden) requestAnimationFrame(loop);
-      }
+  <!-- Сцена: два пути задачи. Через менеджера она доходит с вопросом, напрямую — без потерь -->
+  <div class="panel scene route-scene" id="routes" data-rv aria-hidden="true"><div class="board b8">
+   <svg class="wire" viewBox="0 0 334 180" fill="none">
+    <path class="w-line" d="M56 46H98" pathLength="100"/><path class="w-line" d="M192 46H226" pathLength="100"/>
+    <path class="w-line rb" d="M56 132H226" pathLength="100"/>
+    <path class="w-dot ra1" d="M56 46H98" pathLength="100"/><path class="w-dot ra2" d="M192 46H226" pathLength="100"/>
+    <path class="w-dot rb1" d="M56 132H226" pathLength="100"/>
+   </svg>
+   <span class="rt a you">Вы</span><span class="rt a mgr">менеджер</span><span class="rt a dev">программист<i class="rt-q">?</i></span>
+   <span class="rt b you">Вы</span><span class="rt b me">Евгений<svg class="ok" viewBox="0 0 20 20"><circle cx="10" cy="10" r="10"/><path d="M6 10.4l2.7 2.7L14 7.5"/></svg></span>
+  </div></div>
+ </div>
+</section></div>
 
-      resize(true);
-      window.addEventListener("resize", function () { resize(false); if (reduce) draw(); });
+<!-- Блок 9. Вопросы -->
+<div class="wrap"><section class="s s-flat">
+ <div class="faq-wrap">
+  <h2 data-split>Что ещё спрашивают</h2>
+  <div class="faq">
+   <details data-rv><summary>У меня маленький бизнес. Мне это нужно? <span class="pm"></span></summary><p class="a">Чем меньше команда, тем больше рутины лично на вас — и тем заметнее, когда её забирает бот.</p></details>
+   <details data-rv style="--d:60"><summary>Что с моими данными? <span class="pm"></span></summary><p class="a">Код работает на вашем сервере. Нет сервера — заведём его на вас. Мой доступ вы можете забрать в любой момент.</p></details>
+   <details data-rv style="--d:120"><summary>А закон о персональных данных? Нейросети ведь зарубежные. <span class="pm"></span></summary><p class="a">Поэтому персональные данные в них не уходят. Перед отправкой в нейросеть я обезличиваю данные: убираю имена, телефоны и всё, по чему можно узнать человека.</p></details>
+   <details data-rv style="--d:180"><summary>Сколько моего времени уйдёт? <span class="pm"></span></summary><p class="a">Больше всего — в начале: на первых созвонах разбираемся, как у вас всё устроено. Это можно поручить ассистенту или администратору, если он есть. Дальше я работаю сам, а от вас нужно меньше: посмотреть и принять этапы.</p></details>
+   <details data-rv style="--d:240"><summary>Могу же собрать сам на ChatGPT или n8n. <span class="pm"></span></summary><p class="a">Можете. Если начнёт ломаться, приходите, разберём почему. Если вам удобнее n8n или Make, соберу и на них.</p></details>
+  </div>
+ </div>
+</section></div>
 
-      if (reduce) { draw(); return; }
+<!-- Блок 10. Форма -->
+<div class="sec" id="form"><section class="form"><div class="wrap"><div class="fwrap">
+ <div>
+  <h2 data-split>Что вы делаете руками каждый день?</h2>
+  <p class="sub" data-rv style="--d:150">Оставьте Telegram. Напишу, задам пару вопросов и пришлю план. Решать будете вы.</p>
+ </div>
+ <div class="fcard" id="fcard" data-rv style="--d:200">
+  <div class="slots"><span class="dot"></span>Беру 3 проекта в месяц, чтобы каждый вести самому — от разбора до запуска.</div>
+  <form id="lead" novalidate>
+   <label class="flabel" for="tg">Ваш Telegram</label>
+   <div class="fbox"><input id="tg" name="telegram" type="text" placeholder="@ник или номер Telegram" inputmode="text" autocapitalize="off" autocomplete="off" spellcheck="false" aria-describedby="ferr"><button class="btn" type="submit"><span class="btn-t">Разобрать мою задачу</span> <span class="ar"><svg><use href="#i-arrow"/></svg></span><span class="spin btn-spin"></span></button></div>
+   <p class="ferr" id="ferr" role="alert"></p>
+   <!-- ловушка для ботов: люди это поле не видят -->
+   <div class="hp" aria-hidden="true"><label for="hp">Не заполняйте</label><input id="hp" name="_honey" type="text" tabindex="-1" autocomplete="off"></div>
+  </form>
+  <div class="okstate" id="ok" role="status" hidden><svg viewBox="0 0 28 28" aria-hidden="true"><circle cx="14" cy="14" r="14"/><path d="M8.6 14.5l3.6 3.6 7.2-7.7" pathLength="100"/></svg><div><b>Готово, напишу в течение дня.</b> С вашей задачи и начнём.</div></div>
+  <svg class="plane" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 4.2 3.6 10.7c-.9.4-.9 1.1-.2 1.3l4.3 1.4 1.7 5.1c.2.6.4.8.8.8s.6-.2.9-.5l2.1-2 4.3 3.2c.8.4 1.4.2 1.6-.7l2.8-13.4c.3-1.2-.4-1.7-1.4-1.3z"/></svg>
+ </div>
+</div></div></section></div>
 
-      window.addEventListener("pointermove", function (e) {
-        if (e.pointerType === "touch") return;
-        mouse.x = e.clientX; mouse.y = e.clientY;
-      });
-      document.addEventListener("pointerleave", function () { mouse.x = mouse.y = -9999; });
-      document.addEventListener("visibilitychange", function () {
-        if (!document.hidden) requestAnimationFrame(loop);
-      });
+<div class="wrap"><footer class="foot">
+ <a class="logo" href="#" aria-label="ivanoff.pro — в начало страницы">ivanoff<i>.pro</i></a>
+ <nav class="foot-l" aria-label="its.ivanoff в соцсетях"><a href="https://www.instagram.com/its.ivanoff/" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-ig"/></svg>Instagram</a><a href="https://www.tiktok.com/@its.ivanoff" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-tt"/></svg>TikTok</a></nav>
+</footer></div>
 
-      requestAnimationFrame(loop);
-    })();
-  </script>
+<!-- Окно с формой: его открывают все кнопки «Разобрать мою задачу». Форма внизу страницы остаётся как была -->
+<dialog class="modal" id="modal" aria-labelledby="modal-t">
+ <div class="modal-in fcard">
+  <button class="modal-x" type="button" aria-label="Закрыть"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  <h2 id="modal-t">Что вы делаете руками каждый день?</h2>
+  <p class="sub">Оставьте Telegram. Напишу, задам пару вопросов и пришлю план. Решать будете вы.</p>
+  <form novalidate>
+   <label class="flabel" for="tg-m">Ваш Telegram</label>
+   <div class="fbox"><input id="tg-m" name="telegram" type="text" placeholder="@ник или номер Telegram" inputmode="text" autocapitalize="off" autocomplete="off" spellcheck="false" aria-describedby="ferr-m" autofocus><button class="btn" type="submit"><span class="btn-t">Разобрать мою задачу</span> <span class="ar"><svg><use href="#i-arrow"/></svg></span><span class="spin btn-spin"></span></button></div>
+   <p class="ferr" id="ferr-m" role="alert"></p>
+   <div class="hp" aria-hidden="true"><label for="hp-m">Не заполняйте</label><input id="hp-m" name="_honey" type="text" tabindex="-1" autocomplete="off"></div>
+  </form>
+  <div class="okstate" role="status" hidden><svg viewBox="0 0 28 28" aria-hidden="true"><circle cx="14" cy="14" r="14"/><path d="M8.6 14.5l3.6 3.6 7.2-7.7" pathLength="100"/></svg><div><b>Готово, напишу в течение дня.</b> С вашей задачи и начнём.</div></div>
+  <svg class="plane" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 4.2 3.6 10.7c-.9.4-.9 1.1-.2 1.3l4.3 1.4 1.7 5.1c.2.6.4.8.8.8s.6-.2.9-.5l2.1-2 4.3 3.2c.8.4 1.4.2 1.6-.7l2.8-13.4c.3-1.2-.4-1.7-1.4-1.3z"/></svg>
+ </div>
+</dialog>
+
+<div class="sticky"><a class="btn" href="#form">Разобрать мою задачу <span class="ar"><svg><use href="#i-arrow"/></svg></span></a></div>
+
+<script src="js/main.js" defer></script>
 </body>
 </html>
