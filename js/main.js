@@ -189,6 +189,16 @@
         if (card === from) card.classList.add("sent"); // самолётик и прорисовка галочки — там, где нажали
       });
     }
+    /* Заявка действительно ушла: сообщаем счётчикам. Вызывается только после ответа сервиса «успех»,
+       не для ботов и не при ошибке. Каждый вызов в try: если счётчик заблокирован, форма не ломается.
+       Метрика — цель с идентификатором lead (её нужно завести в кабинете), Meta Pixel — стандартное событие Lead. */
+    function trackLead(place) {
+      try { if (window.ym) ym(56199040, "reachGoal", "lead", { place: place }); } catch (e) {}
+      try { if (window.fbq) fbq("track", "Lead", { content_name: place }); } catch (e) {}
+      // Google: событие кладётся в dataLayer. Дальше его подхватывает контейнер Tag Manager —
+      // триггер «Специальное событие» с именем generate_lead и тег GA4, если они в контейнере настроены
+      try { (window.dataLayer = window.dataLayer || []).push({ event: "generate_lead", lead_place: place }); } catch (e) {}
+    }
 
     cards.forEach(function (card) {
       var lead = $("form", card), err = $(".ferr", card), box = $(".fbox", card);
@@ -238,7 +248,10 @@
           .then(function (res) { return res.json(); })
           .then(function (data) {
             clearTimeout(timer);
-            if (data.success === true || data.success === "true") allDone(card);
+            if (data.success === true || data.success === "true") {
+              allDone(card);
+              trackLead(card.classList.contains("modal-in") ? "окно" : "форма внизу");
+            }
             else throw new Error(data.message || "send failed");
           })
           .catch(function () {
