@@ -116,6 +116,53 @@
     });
   })();
 
+  /* ===== Экраны бота в кейсе: кнопки листают ленту на ширину видимой части ===== */
+  (function () {
+    var strip = $("#shots");
+    if (!strip) return;
+    var prev = $(".shots-nav.prev"), next = $(".shots-nav.next"), queued = false;
+    function sync() {
+      queued = false;
+      prev.disabled = strip.scrollLeft < 8;
+      next.disabled = strip.scrollLeft + strip.clientWidth > strip.scrollWidth - 8;
+    }
+    function go(dir) { strip.scrollBy({ left: dir * strip.clientWidth * 0.8, behavior: reduce ? "auto" : "smooth" }); }
+    prev.addEventListener("click", function () { go(-1); });
+    next.addEventListener("click", function () { go(1); });
+    strip.addEventListener("scroll", function () { if (!queued) { queued = true; requestAnimationFrame(sync); } }, { passive: true });
+    addEventListener("resize", sync);
+    sync();
+  })();
+
+  /* ===== Экраны бота в кейсе: клик открывает скриншот крупно ===== */
+  (function () {
+    var zoom = $("#zoom");
+    if (!zoom || !zoom.showModal) return;
+    var big = $("img", zoom), frame = null;
+    $$(".shot-b").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var img = $("img", b), tg = $(".tgf", b);
+        if (frame) { frame.parentNode.removeChild(frame); frame = null; }
+        big.hidden = !!tg;
+        if (tg) { // скриншот в дорисованном окне Telegram показываем вместе с окном
+          frame = tg.cloneNode(true);
+          zoom.appendChild(frame);
+        } else {
+          big.src = img.currentSrc || img.src;
+          big.alt = img.alt;
+        }
+        zoom.showModal();
+        root.classList.add("modal-open");
+      });
+    });
+    $(".modal-x", zoom).addEventListener("click", function () { zoom.close(); });
+    zoom.addEventListener("close", function () { root.classList.toggle("modal-open", false); });
+    zoom.addEventListener("click", function (e) { // клик мимо картинки, по затемнению
+      var r = zoom.getBoundingClientRect();
+      if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) zoom.close();
+    });
+  })();
+
   /* ===== Заявка: форма в окне и форма внизу страницы =====
      Одно поле — Telegram. Заявки уходят через Web3Forms (web3forms.com) письмом на почту Евгения,
      без своего сервера. До 19.11.2026 стоял FormSubmit: он перестал отвечать.

@@ -611,6 +611,57 @@ h2 { font-weight: 700; font-size: 30px; line-height: 34px; letter-spacing: -.025
 .win { background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 20px 24px; }
 .win b { font-size: 18px; line-height: 26px; }
 .win span { color: var(--soft); }
+/* настоящие экраны бота: лента из пятнадцати скриншотов, листается пальцем, колесом и кнопками; клик открывает крупно */
+.shots-wrap { position: relative; margin-top: 32px; }
+.shots { display: flex; align-items: start; gap: 14px; margin: 0 -16px; padding: 8px 16px 12px; overflow-x: auto; scroll-snap-type: x proximity; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+.shots::-webkit-scrollbar { display: none; }
+.shot { flex: none; width: 62%; max-width: 230px; scroll-snap-align: start; scroll-margin-left: 16px; }
+.shots-nav { display: none; }
+@media (min-width: 900px) {
+  .shots-wrap { margin-top: 48px; }
+  .shots { gap: 18px; margin: 0; padding: 8px 2px 12px; scroll-padding-left: 2px; }
+  .shot { width: 190px; scroll-margin-left: 2px; }
+  .shots-nav {
+    position: absolute; top: 172px; z-index: 2; display: flex; align-items: center; justify-content: center;
+    width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--line); background: var(--card); color: var(--ink);
+    box-shadow: var(--sh); cursor: pointer; transition: opacity .25s, transform .2s var(--ease-out), background-color .2s;
+  }
+  .shots-nav svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .shots-nav.prev { left: -22px; }
+  .shots-nav.next { right: -22px; }
+  .shots-nav:active { transform: scale(.94); }
+  .shots-nav[disabled] { opacity: 0; pointer-events: none; }
+}
+@media (min-width: 900px) and (hover: hover) { .shots-nav:hover { background: var(--ink); color: #fff; } }
+.shot-b { display: block; width: 100%; padding: 0; border: 1px solid var(--line); border-radius: 22px; background: var(--card); overflow: hidden; cursor: zoom-in; box-shadow: var(--sh); transition: transform .35s var(--ease-out), box-shadow .35s; }
+.shot-b img { display: block; width: 100%; height: auto; aspect-ratio: 640 / 1260; object-fit: cover; object-position: 50% 0; }
+@media (hover: hover) { .shot-b:hover { transform: translateY(-6px); box-shadow: 0 2px 4px rgba(23, 23, 23, .05), 0 22px 44px rgba(23, 23, 23, .14); } }
+/* скриншот переписки ниже остальных, поэтому вокруг него дорисовано окно Telegram до общей высоты:
+   шапка чата, фон, строка ввода. Размеры в cqw — рамка одинаково выглядит в ленте и в увеличении */
+.tgf { display: flex; flex-direction: column; aspect-ratio: 640 / 1260; container-type: inline-size; background: #B5D08F; text-align: left; }
+.tgf-h, .tgf-f { flex: none; display: flex; align-items: center; background: #fff; color: var(--ink); }
+.tgf-h { gap: 3cqw; height: 15cqw; padding: 0 4cqw; border-bottom: 1px solid var(--line); }
+.tgf-h > svg, .tgf-f svg { flex: none; width: 6.5cqw; height: 6.5cqw; fill: none; stroke: var(--tg); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.tgf-n { flex: 1; text-align: center; line-height: 1.2; }
+.tgf-n b { display: block; font-size: 4.6cqw; font-weight: 600; }
+.tgf-n small { display: block; font-size: 3.6cqw; color: var(--soft); }
+.tgf-av { flex: none; display: flex; align-items: center; justify-content: center; width: 10cqw; height: 10cqw; border-radius: 50%; background: var(--ink); }
+.tgf-av svg { width: 5.6cqw; height: 5.6cqw; fill: none; stroke: #fff; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.tgf-c { flex: 1; display: flex; align-items: flex-end; overflow: hidden; }
+.shot-tg .tgf-c img, .zoom .tgf-c img { aspect-ratio: 640 / 698; object-fit: cover; }
+.tgf-f { gap: 3cqw; height: 14cqw; padding: 0 4cqw; }
+.tgf-f svg { stroke: #8E8E93; }
+.tgf-f i { flex: 1; font-style: normal; font-size: 4.4cqw; color: #8E8E93; background: var(--panel); border-radius: 999px; padding: 1.6cqw 4cqw; }
+.shot figcaption { margin-top: 12px; font-size: 14px; line-height: 20px; font-weight: 500; color: var(--soft); }
+.zoom { margin: auto; padding: 0; border: 0; border-radius: 28px; background: var(--card); max-width: min(440px, calc(100% - 24px)); max-height: calc(100% - 24px); overflow: auto; box-shadow: 0 24px 80px rgba(23, 23, 23, .3); }
+.zoom::backdrop { background: rgba(23, 23, 23, .6); }
+.zoom[open] { animation: modal-in .35s var(--ease-out); }
+.zoom img { display: block; width: 100%; height: auto; }
+.zoom > img[hidden] { display: none; }
+.zoom > .tgf { width: min(440px, calc(100vw - 24px)); }
+.zoom .tgf-av { visibility: hidden; } /* на этом месте в увеличении стоит крестик */
+.zoom .modal-x { position: sticky; float: right; margin: 12px 12px -52px 0; }
+
 /* этапы кейса — всегда раскрытые карточки (до 19.11.2026 были раскрывашками) */
 .acc { background: var(--card); border: 1px solid var(--line); border-radius: 20px; margin-top: 12px; }
 .acc h3 { padding: 22px 24px 4px; font-weight: 600; font-size: 20px; line-height: 27px; }
